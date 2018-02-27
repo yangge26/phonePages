@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>水平移动</title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.box {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				overflow: hidden;
+			}
+			
+			.item {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				transition-duration: 0ms;
+				-webkit-transition-duration: 0ms;
+				transform: translateX(100%);
+				-webkit-transform: translateX(100%);
+			}
+			
+			.box.move .item {
+				transition-duration: 200ms;
+				-webkit-transition-duration: 200ms;
+			}
+			
+			.item.first {
+				transform: translateX(0);
+				-webkit-transform: translateX(0);
+			}
+			
+			.red {
+				background: red;
+			}
+			
+			.green {
+				background: blue;
+			}
+			
+			.yellow {
+				background: green;
+			}
+			
+			.blue {
+				background: yellow;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="box">
+			<div class="item first red"></div>
+			<div class="item green"></div>
+			<div class="item yellow"></div>
+			<div class="item blue"></div>
+		</div>
+		<script type="text/javascript">
+			(function() {
+
+				var box = document.querySelectorAll(".box")[0];
+				var list = box.querySelectorAll(".item");
+				var len = list.length;
+				var boxW = box.clientWidth;
+
+				var startX = null,
+					startTime = null,
+					cur = 0,
+					isEnd = false;
+
+				box.addEventListener('touchstart', function(ev) {
+					//添加动画效果
+					box.classList.remove('move');
+					startX = ev.touches[0].clientX;
+					startTime = new Date();
+					isEnd = false;
+				});
+
+				box.addEventListener('touchmove', function(ev) {
+					ev.preventDefault();
+					var changeX = ev.changedTouches[0].clientX;
+					if(startX - changeX > 0) {
+						//left
+						if(cur === len - 1) {
+							//最后一张不能进行左滑
+							isEnd = true;
+							return;
+						}
+
+					} else {
+						//right
+						if(cur === 0) {
+							//第一张不能进行右滑
+							isEnd = true;
+							return;
+						}
+					}
+
+					doMove(changeX - startX);
+
+				});
+
+				box.addEventListener('touchend', function(ev) {
+
+					if(isEnd) {
+						return;
+					}
+
+					box.classList.add('move');
+
+					var changeX = ev.changedTouches[0].clientX;
+					var endTime = new Date();
+
+					if(endTime - startTime < 250 && Math.abs(startX - changeX) > 10) {
+
+						if(startX - changeX > 0) {
+							//左滑
+							next();
+						} else {
+							//右滑
+							prev();
+						}
+
+					} else {
+						if(Math.abs(startX - changeX) >= parseInt(boxW / 2)) {
+							if(startX - changeX > 0) {
+								next();
+							} else {
+								prev();
+							}
+
+						} else {
+							noMove();
+						}
+					}
+
+				});
+
+				function next() {
+					doMove(-boxW);
+					if(++cur === len) {
+						cur = 0;
+					}
+				}
+
+				function prev() {
+					doMove(boxW);
+					if(--cur === -1) {
+						cur = len - 1;
+					}
+				}
+
+				function noMove() {
+					doMove(0);
+				}
+
+				function doMove(dis) {
+					if(cur > 0) {
+						list[cur - 1].style.transform = 'translateX(' + (-boxW + dis) + 'px)';
+						list[cur - 1].style.webkitTransform = 'translateX(' + (-boxW + dis) + 'px)';
+					}
+					list[cur].style.transform = 'translateX(' + dis + 'px)';
+					list[cur].style.webkitTransform = 'translateX(' + dis + 'px)';
+					if(cur < len - 1) {
+						list[cur + 1].style.transform = 'translateX(' + (boxW + dis) + 'px)';
+						list[cur + 1].style.webkitTransform = 'translateX(' + (boxW + dis) + 'px)';
+					}
+				}
+
+			})();
+		</script>
+	</body>
+
+</html>

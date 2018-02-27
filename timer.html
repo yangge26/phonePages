@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>定时滑动</title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.box {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				overflow: hidden;
+			}
+			
+			.item {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				transition-duration: 0ms;
+				-webkit-transition-duration: 0ms;
+				transform: translateX(0);
+				-webkit-transform: translateX(0);
+			}
+			
+			.item.prev {
+				transform: translateX(-100%);
+				-webkit-transform: translateX(-100%);
+			}
+			
+			.item.next {
+				transform: translateX(100%);
+				-webkit-transform: translateX(100%);
+			}
+			
+			.box.move .item {
+				transition-duration: 200ms;
+				-webkit-transition-duration: 200ms;
+			}
+			
+			.red {
+				background: red;
+			}
+			
+			.green {
+				background: blue;
+			}
+			
+			.yellow {
+				background: green;
+			}
+			
+			.blue {
+				background: yellow;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="box">
+			<div class="item red"></div>
+			<div class="item green next"></div>
+			<div class="item yellow prev"></div>
+		</div>
+		<script type="text/javascript">
+			var slider = (function() {
+
+				var box, list, len, boxW;
+				var startX, startTime;
+				var cur = 0;
+				var timer = null;
+				var webkitTransitionEndCount = 0;
+				var autoplay = 3000;
+
+				function init(opts) {
+
+					box = opts.el;
+					list = box.querySelectorAll(".item");
+					len = list.length;
+					boxW = box.clientWidth;
+
+					if(opts.autoplay) {
+						autoplay = opts.autoplay;
+					}
+
+					startTimer();
+
+					box.addEventListener('touchstart', function(ev) {
+						endTimer();
+						box.classList.remove('move');
+						startX = ev.touches[0].clientX;
+						startTime = new Date();
+					});
+
+					box.addEventListener('touchmove', function(ev) {
+						ev.preventDefault();
+						var changeX = ev.changedTouches[0].clientX;
+						doMove(changeX - startX);
+					});
+
+					box.addEventListener('touchend', function(ev) {
+
+						box.classList.add('move');
+
+						var changeX = ev.changedTouches[0].clientX;
+						var endTime = new Date();
+
+						if(endTime - startTime < 250 && Math.abs(startX - changeX) > 10) {
+
+							if(startX - changeX > 0) {
+								next();
+							} else {
+								prev();
+							}
+
+						} else {
+							if(Math.abs(startX - changeX) >= parseInt(boxW / 2)) {
+								if(startX - changeX > 0) {
+									next();
+								} else {
+									prev();
+								}
+
+							} else {
+								noMove();
+							}
+						}
+
+					});
+
+					box.addEventListener('webkitTransitionEnd', function() {
+						if(++webkitTransitionEndCount === 3) {
+							box.classList.remove('move');
+							elMove(getPrevEl(), -boxW);
+							elMove(getNextEl(), boxW);
+							startTimer();
+							webkitTransitionEndCount = 0;
+						}
+					});
+
+				}
+
+				function startTimer() {
+					clearInterval(timer);
+					timer = setInterval(function() {
+						box.classList.add('move');
+						next();
+					}, autoplay);
+				}
+
+				function endTimer() {
+					clearInterval(timer);
+				}
+
+				function next() {
+					doMove(-boxW);
+					if(++cur === len) {
+						cur = 0;
+					}
+				}
+
+				function prev() {
+					doMove(boxW);
+					if(--cur === -1) {
+						cur = len - 1;
+					}
+				}
+
+				function noMove() {
+					doMove(0);
+				}
+
+				function doMove(dis) {
+					elMove(getPrevEl(), -boxW + dis);
+					elMove(list[cur], dis);
+					elMove(getNextEl(), boxW + dis);
+				}
+
+				function getPrevEl() {
+					if(cur - 1 === -1) {
+						return list[2];
+					}
+					return list[cur - 1];
+				}
+
+				function getNextEl() {
+					if(cur + 1 === 3) {
+						return list[0];
+					}
+					return list[cur + 1];
+				}
+
+				function elMove(el, x) {
+					el.style.transform = 'translateX(' + x + 'px)';
+					el.style.webkitTransform = 'translateX(' + x + 'px)';
+				}
+
+				return {
+					init: init,
+					getCurrentIndex: function() {
+						return cur;
+					}
+				}
+
+			})();
+
+			slider.init({
+				el: document.querySelectorAll(".box")[0],
+				autoplay: 3000
+			});
+
+			setInterval(function() {
+				console.log(slider.getCurrentIndex());
+			}, 1000);
+		</script>
+	</body>
+
+</html>

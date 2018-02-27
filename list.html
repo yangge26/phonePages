@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>左滑删除</title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			li {
+				list-style: none;
+				position: relative;
+			}
+			
+			li .item {
+				position: relative;
+				box-sizing: border-box;
+				padding: 0 10px;
+				height: 60px;
+				line-height: 60px;
+				font-size: 20px;
+				background: #FFFFFF;
+				z-index: 99;
+				width: 100%;
+				transition-property: transform;
+				transition-duration: 0ms;
+			}
+			
+			li .item:after {
+				position: absolute;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				height: 1px;
+				content: '';
+				background-color: #DDDDDD;
+			}
+			
+			li .item.move {
+				transition-duration: 200ms;
+			}
+			
+			li .action {
+				position: absolute;
+				height: 60px;
+				line-height: 60px;
+				box-sizing: border-box;
+				top: 0;
+				bottom: 0;
+				right: 0;
+				width: 90px;
+				background: #FF0000;
+				color: #FFFFFF;
+				font-size: 18px;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<ul>
+			<li>
+				<div class="item">杨过</div>
+				<div class="action">删除</div>
+			</li>
+			<li>
+				<div class="item">小龙女</div>
+				<div class="action">删除</div>
+			</li>
+			<li>
+				<div class="item">令狐冲</div>
+				<div class="action">删除</div>
+			</li>
+			<li>
+				<div class="item">任盈盈</div>
+				<div class="action">删除</div>
+			</li>
+		</ul>
+
+		<script type="text/javascript">
+			var el = document.querySelectorAll("ul")[0];
+
+			var startX, startTime, moveEl;
+			var isMove = false;
+			var isTouchEnd = false;
+
+			var size = 90;
+
+			var itemList = el.querySelectorAll('.item');
+			var aList = el.querySelectorAll('.action');
+
+			//绑定移动事件
+			for(var i = 0; i < itemList.length; i++) {
+
+				var temp = itemList[i];
+
+				temp.addEventListener('touchstart', function(ev) {
+					var target = ev.target;
+					if(isMove) {
+						isTouchEnd = true;
+						noMove();
+					} else {
+						isTouchEnd = false;
+						moveEl = target;
+						//移除动画效果
+						moveEl.classList.remove('move');
+						startX = ev.touches[0].clientX;
+						startTime = new Date();
+					}
+
+				});
+
+				temp.addEventListener('touchmove', function(ev) {
+					if(!isTouchEnd) {
+						changeX = ev.changedTouches[0].clientX;
+						if(startX - changeX > 0) {
+							//向左滑动才进行移动
+							dis = startX - changeX;
+							if(dis > size) {
+								dis = size;
+							}
+							moveEl.style.transform = "translateX(-" + dis + "px)";
+						}
+					}
+				});
+
+				temp.addEventListener('touchend', function(ev) {
+					if(!isTouchEnd) {
+						changeX = ev.changedTouches[0].clientX;
+						endTime = new Date();
+						//添加动画效果
+						moveEl.classList.add('move');
+						
+						if(endTime - startTime < 250 && startX - changeX > 10) {
+							//快速左滑
+							doMove();
+						} else {
+							if(startX - changeX > size / 2) {
+								//滑动距离超过一半								
+								doMove();
+							} else {
+								noMove();
+							}
+						}
+					}
+				});
+
+			}
+
+			//绑定删除事件
+			for(var i = 0; i < aList.length; i++) {
+
+				var temp = aList[i];
+
+				temp.addEventListener('click', function(ev) {
+					var target = ev.target;
+					doRemove(target);
+					isMove = false;
+				});
+
+			}
+
+			function doMove() {
+				moveEl.style.transform = "translateX(-" + size + "px)";
+				isMove = true;
+			}
+
+			function noMove() {
+				moveEl.style.transform = "translateX(0px)";
+				isMove = false;
+			}
+
+			function doRemove(child) {
+				var parentEl = child.parentNode;
+				el.removeChild(parentEl);
+			}
+		</script>
+	</body>
+
+</html>
