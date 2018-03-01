@@ -6,3 +6,4 @@
 - [定时滑动效果](https://yangge26.github.io/phonePages/timer.html)
 - [无限活动效果](https://yangge26.github.io/phonePages/infinity.html)
 - [左滑删除列表](https://yangge26.github.io/phonePages/list.html)
+- [手机轮播图](https://yangge26.github.io/phonePages/carousel.html)
