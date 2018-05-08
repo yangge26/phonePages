@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>小圆点</title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.box {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 60px;
+				height: 60px;
+				border-radius: 50%;
+				background: rgba(0, 0, 0, 0.3);
+				transform: translate3d(0, 0, 0);
+				-webkit-transform: translate3d(0, 0, 0);
+			}
+			
+			.box.move {
+				transition: transform 150ms ease-in-out;
+			}
+			
+			.container {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+
+			<div class="box">
+
+			</div>
+
+		</div>
+
+		<script type="text/javascript">
+			document.querySelectorAll(".container")[0].addEventListener('touchmove', function(ev) {
+				ev.preventDefault();
+			});
+
+			var el = document.querySelectorAll(".box")[0];
+			var elWidth = 60;
+			var start = {
+
+			};
+			var change = {
+
+			};
+			var cur = {
+				x: 0,
+				y: 0
+			};
+			var movex;
+			var movey;
+
+			var wHeight = window.innerHeight;
+			var wWidth = document.body.offsetWidth;
+
+			el.addEventListener('touchstart', function(ev) {
+				el.classList.remove('move');
+				var ts = ev.touches;
+				start.x = ts[0].clientX;
+				start.y = ts[0].clientY;
+			});
+
+			el.addEventListener('touchmove', function(ev) {
+				ev.preventDefault();
+				var ts = ev.changedTouches;
+
+				change.x = ts[0].clientX;
+				change.y = ts[0].clientY;
+
+				movex = change.x - start.x + cur.x;
+				movey = change.y - start.y + cur.y;
+
+				if(movex < 0) {
+					movex = 0;
+				}
+				if(movey < 0) {
+					movey = 0;
+				}
+
+				if(movex > wWidth - elWidth) {
+					movex = wWidth - elWidth;
+				}
+
+				if(movey > wHeight - elWidth) {
+					movey = wHeight - elWidth;
+				}
+
+				el.style.transform = 'translate3d(' + movex + 'px,' + movey + 'px,0)';
+				el.style.webkitTransform = 'translate3d(' + movex + 'px,' + movey + 'px,0)';
+			});
+			el.addEventListener('touchend', function(ev) {
+				cur.x = movex;
+				cur.y = movey;
+
+				el.classList.add('move');
+
+				if(movex >= (wWidth - elWidth) / 2) {
+					el.style.transform = 'translate3d(' + (wWidth - elWidth) + 'px,' + movey + 'px,0)';
+					el.style.webkitTransform = 'translate3d(' + (wWidth - elWidth) + 'px,' + movey + 'px,0)';
+					cur.x = wWidth - elWidth;
+				} else {
+					el.style.transform = 'translate3d(0px,' + movey + 'px,0)';
+					el.style.webkitTransform = 'translate3d(0px,' + movey + 'px,0)';
+					cur.x = 0;
+				}
+
+			});
+		</script>
+	</body>
+
+</html>
